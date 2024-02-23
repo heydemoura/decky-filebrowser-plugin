@@ -1,15 +1,55 @@
 import os
+import asyncio
+import subprocess
 
 # The decky plugin module is located at decky-loader/plugin
 # For easy intellisense checkout the decky-loader code one directory up
 # or add the `decky-loader/plugin` path to `python.analysis.extraPaths` in `.vscode/settings.json`
 import decky_plugin
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+pidfile = script_dir + "/bin/filebrowser.pid"
 
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
     async def add(self, left, right):
         return left + right
+
+    async def getFileBrowserStatus( self ):
+        if os.path.exists( pidfile ):
+            with open( pidfile, "r" ) as file:
+                pid_str = file.read().strip()
+
+            return pid_str
+        else:
+            return False
+
+    async def startFileBrowser( self, port = "8082" ):
+        command = script_dir + "/bin/filebrowser -p " + port + " -a 0.0.0.0 -r /home/deck"
+        process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+        with open(pidfile, "w") as file:
+            file.write(str(process.pid))
+
+        return process.pid
+
+    async def stopFileBrowser( self, pid ):
+        #pidfile = script_dir + "/bin/filebrowser.pid"
+        with open(pidfile, "r") as file:
+            pid_str = file.read().strip()
+
+        command = "kill " + pid_str
+        #process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        output, error = process.communicate()
+        output_str = output.decode("utf-8")
+
+        if os.path.exists(pidfile):
+            # Delete the file
+            os.remove(pidfile)
+
+        return output_str
 
     # Asyncio-compatible long-running code, executed in a task when the plugin is loaded
     async def _main(self):

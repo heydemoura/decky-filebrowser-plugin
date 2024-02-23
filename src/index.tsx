@@ -1,18 +1,13 @@
 import {
   ButtonItem,
   definePlugin,
-  DialogButton,
-  Menu,
-  MenuItem,
-  Navigation,
   PanelSection,
   PanelSectionRow,
   ServerAPI,
-  showContextMenu,
   staticClasses,
 } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
-import { FaShip } from "react-icons/fa";
+import { FaServer } from "react-icons/fa";
 import QRCode from 'qrcode.react';
 
 import logo from "../assets/logo.png";
@@ -96,28 +91,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   );
 };
 
-const DeckyPluginRouterTest: VFC = () => {
-  return (
-    <div style={{ marginTop: "50px", color: "white" }}>
-      Hello World!
-      <DialogButton onClick={() => Navigation.NavigateToLibraryTab()}>
-        Go to Library
-      </DialogButton>
-    </div>
-  );
-};
-
 export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-    exact: true,
-  });
-
   return {
-    title: <div className={staticClasses.Title}>Example Plugin</div>,
+    title: <div className={staticClasses.Title}>File Browser</div>,
     content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
-    onDismount() {
-      serverApi.routerHook.removeRoute("/decky-plugin-test");
-    },
+    icon: <FaServer />,
   };
 });

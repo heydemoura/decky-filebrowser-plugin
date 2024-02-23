@@ -24,11 +24,6 @@ class Plugin:
             hostname = socket.gethostname()
             ipv4_address = socket.gethostbyname(hostname)
 
-            decky_plugin.logger.info({
-                "pid": pid_str,
-                "ipv4_address": ipv4_address
-            })
-
             return {
                 "pid": pid_str,
                 "ipv4_address": ipv4_address

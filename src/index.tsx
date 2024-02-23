@@ -8,7 +8,7 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaServer } from "react-icons/fa";
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 import logo from "../assets/logo.png";
 
@@ -79,7 +79,10 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
 
       <PanelSectionRow>
         { processPID > 0 && serverStatus ?
-          <QRCode value={ `http://${serverIP}:8082` } />
+          <QRCodeSVG
+            value={ `http://${serverIP}:8082` }
+            size={256}
+          />
           : (
             <div style={{ display: "flex", justifyContent: "center" }}>
               <img src={logo} />

@@ -13,31 +13,15 @@ import {
 } from "decky-frontend-lib";
 import { useEffect, useState, VFC } from "react";
 import { FaShip } from "react-icons/fa";
+import QRCode from 'qrcode.react';
 
 import logo from "../assets/logo.png";
 
-// interface AddMethodArgs {
-//   left: number;
-//   right: number;
-// }
+interface GetFileBrowserStatusResult { result: { pid: string | number, ipv4_address: string }, success: boolean };
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
-  // const [result, setResult] = useState<number | undefined>();
-
-  // const onClick = async () => {
-  //   const result = await serverAPI.callPluginMethod<AddMethodArgs, number>(
-  //     "add",
-  //     {
-  //       left: 2,
-  //       right: 2,
-  //     }
-  //   );
-  //   if (result.success) {
-  //     setResult(result.result);
-  //   }
-  // };
-
   const [ serverStatus, setServerStatus ] = useState( false );
+  const [ serverIP, setServerIP ] = useState( "127.0.0.1" );
   const [ processPID, setProcessPID ] = useState( -1 );
 
   const handleStartServer = async () => {
@@ -74,12 +58,12 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
 
   useEffect( () => {
     const loadStatus = async () => {
-      const result = await serverAPI.callPluginMethod("getFileBrowserStatus", {});
+      const result = await serverAPI.callPluginMethod("getFileBrowserStatus", {}) as GetFileBrowserStatusResult;
 
-      console.log (result.result);
       if (result.result) {
-        setProcessPID( result.result as number );
+        setProcessPID( result.result.pid as number );
         setServerStatus( true );
+        setServerIP( result.result.ipv4_address );
       } else {
         setProcessPID( -1 );
         setServerStatus( false );
@@ -89,53 +73,24 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   } );
 
   return (
-    <PanelSection title="Panel Section">
+    <PanelSection title={ serverStatus ? "Server ON" : "Server OFF" }>
       <PanelSectionRow>
         <ButtonItem layout="below"
-        onClick={handleStartServer}
+          onClick={handleStartServer}
         >
           { serverStatus ? "Stop Server" : "Start Server" }
         </ButtonItem>
       </PanelSectionRow>
-      <PanelSectionRow>
-        Server status: { serverStatus ? 'ON' : 'OFF' }
-        <br />
-        { processPID > 0 ? `PID: ${processPID}` : null }
-      </PanelSectionRow>
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={(e) =>
-            showContextMenu(
-              <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {}}>Item #1</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #2</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #3</MenuItem>
-              </Menu>,
-              e.currentTarget ?? window
-            )
-          }
-        >
-          Server says yolo
-        </ButtonItem>
-      </PanelSectionRow>
 
       <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Navigation.CloseSideMenus();
-            Navigation.Navigate("/decky-plugin-test");
-          }}
-        >
-          Router
-        </ButtonItem>
+        { processPID > 0 && serverStatus ?
+          <QRCode value={ `http://${serverIP}:8082` } />
+          : (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <img src={logo} />
+            </div>
+          )
+        }
       </PanelSectionRow>
     </PanelSection>
   );

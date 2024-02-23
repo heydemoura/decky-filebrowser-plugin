@@ -11,7 +11,7 @@ import {
   showContextMenu,
   staticClasses,
 } from "decky-frontend-lib";
-import { VFC } from "react";
+import { useEffect, useState, VFC } from "react";
 import { FaShip } from "react-icons/fa";
 
 import logo from "../assets/logo.png";
@@ -37,8 +37,71 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
   //   }
   // };
 
+  const [ serverStatus, setServerStatus ] = useState( false );
+  const [ processPID, setProcessPID ] = useState( -1 );
+
+  const handleStartServer = async () => {
+    if ( serverStatus && processPID > 0 ) {
+      console.log( 'Server is running, closing' );
+      const result = await serverAPI.callPluginMethod("stopFileBrowser", {
+        pid: processPID
+      });
+
+      console.log( result );
+
+      if (result.success) {
+        setProcessPID( -1 );
+        setServerStatus( false );
+        console.log( 'Server closed' );
+      } else {
+        console.log( 'Failed to close the server' );
+        console.error( result );
+      }
+
+      return;
+    }
+
+    const result = await serverAPI.callPluginMethod("startFileBrowser", {})
+
+    if (result.success) {
+      setProcessPID( result.result as number )
+      setServerStatus( true );
+    } else {
+      console.error( result );
+    }
+
+  }
+
+  useEffect( () => {
+    const loadStatus = async () => {
+      const result = await serverAPI.callPluginMethod("getFileBrowserStatus", {});
+
+      console.log (result.result);
+      if (result.result) {
+        setProcessPID( result.result as number );
+        setServerStatus( true );
+      } else {
+        setProcessPID( -1 );
+        setServerStatus( false );
+      }
+    }
+    loadStatus();
+  } );
+
   return (
     <PanelSection title="Panel Section">
+      <PanelSectionRow>
+        <ButtonItem layout="below"
+        onClick={handleStartServer}
+        >
+          { serverStatus ? "Stop Server" : "Start Server" }
+        </ButtonItem>
+      </PanelSectionRow>
+      <PanelSectionRow>
+        Server status: { serverStatus ? 'ON' : 'OFF' }
+        <br />
+        { processPID > 0 ? `PID: ${processPID}` : null }
+      </PanelSectionRow>
       <PanelSectionRow>
         <ButtonItem
           layout="below"

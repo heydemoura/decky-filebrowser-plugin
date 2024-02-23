@@ -1,10 +1,10 @@
 {
-  "name": "Example Plugin",
-  "author": "John Doe",
+  "name": "Decky FileBrowser",
+  "author": "Heyde Moura",
   "flags": ["debug", "_root"],
   "publish": {
-    "tags": ["template", "root"],
-    "description": "Decky example plugin.",
-    "image": "https://opengraph.githubassets.com/1/SteamDeckHomebrew/PluginLoader"
+    "tags": [ "files", "server" ],
+    "description": "Send and download files to your Steam Deck from a browser.",
+    "image": "https://opengraph.githubassets.com/1/heydemoura/decky-filebrowser-plugin"
   }
 }

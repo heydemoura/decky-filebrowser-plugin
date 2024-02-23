@@ -1,6 +1,7 @@
 import os
 import asyncio
 import subprocess
+import socket
 
 # The decky plugin module is located at decky-loader/plugin
 # For easy intellisense checkout the decky-loader code one directory up
@@ -20,7 +21,19 @@ class Plugin:
             with open( pidfile, "r" ) as file:
                 pid_str = file.read().strip()
 
-            return pid_str
+            hostname = socket.gethostname()
+            ipv4_address = socket.gethostbyname(hostname)
+
+            decky_plugin.logger.info({
+                "pid": pid_str,
+                "ipv4_address": ipv4_address
+            })
+
+            return {
+                "pid": pid_str,
+                "ipv4_address": ipv4_address
+            }
+
         else:
             return False
 
@@ -34,12 +47,10 @@ class Plugin:
         return process.pid
 
     async def stopFileBrowser( self, pid ):
-        #pidfile = script_dir + "/bin/filebrowser.pid"
         with open(pidfile, "r") as file:
             pid_str = file.read().strip()
 
         command = "kill " + pid_str
-        #process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         output, error = process.communicate()

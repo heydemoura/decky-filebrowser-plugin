@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,700;1,900&display=swap');
+
+:root{
+    --main-bg: #171d25;
+    --main-text: #b0c3cc;
+
+    --icon: #7147c2;
+    --blue: black;
+    --dark-blue: gray;
+    --moon-grey: #1d1e25;
+    --background: #242630;
+    --surfacePrimary: #1d1e25;
+    --surfaceSecondary: #3c3a47;
+
+}
+body{
+    font-family: 'Exo 2', sans-serif;
+    line-height: 19px;
+    background-color: var( --main-bg );
+    color: var( --main-text );
+}
+header{
+    background-color: var(--main-bg);
+}
+#login h1{
+    font-style: italic;
+    font-weight: 900;
+}
+#listing .item{
+    background-color: #1d1e25;
+    color: inherit;
+}
+
+.shell{
+    background-color: #1d1e25;
+}
+
+.card{
+    background-color: var(--moon-grey);
+}
+
+#listing.list .item.header {
+    background-color: var( --main-bg );
+    color: var( --main-text );
+}
+
+#listing.list .item p {
+    color: var( --main-text );
+}
+
+#listing .item[aria-selected="true"] {
+    background-color: rgba( 255, 255, 255, 0.3 ) !important;
+    color: black !important;
+    border-radius: 0.25rem;
+}
+
+nav .action {
+    color: var( --main-text );
+}
+
+#search #input {
+    background-color: rgba(245, 245, 245, 0.7);
+}
+
+#search #input > i {
+    color: black;
+    opacity: 0.7;
+}

@@ -15,8 +15,6 @@ import Settings from './settings';
 import { AppContext, AppContextProvider } from './utils/app-context';
 import FileBrowserManager from './state/filebrowser-manager';
 
-import logo from "../assets/logo.png";
-
 const Content: VFC = () => {
   const [ isLoading, setIsLoading ] = useState( false );
   const [ serverStatus, setServerStatus ] = useState( false );
@@ -63,11 +61,6 @@ const Content: VFC = () => {
     }
   }
 
-  const handlePortChange = ( e ) => {
-    console.log(e.target);
-
-  }
-
   const handleGoToSettings = () => {
     Navigation.CloseSideMenus();
     Navigation.Navigate("/decky-filebrowser-settings")
@@ -85,58 +78,56 @@ const Content: VFC = () => {
   }, [] );
 
   return (
-    <PanelSection title={ isServerRunning ? "Server ON" : "Server OFF" }>
-      <PanelSectionRow>
-        <ButtonItem layout="below"
-          onClick={handleStartServer}
-          disabled={ isLoading }
-        >
-          { isServerRunning ? "Stop Server" : "Start Server" }
-        </ButtonItem>
-      </PanelSectionRow>
+    <>
+      <PanelSection title={ isServerRunning ? "Server ON" : "Server OFF" }>
+        <PanelSectionRow>
+          <ButtonItem layout="below"
+            onClick={handleStartServer}
+            disabled={ isLoading }
+          >
+            { isServerRunning ? "Stop Server" : "Start Server" }
+          </ButtonItem>
+        </PanelSectionRow>
 
-      { isServerRunning ? (
-        <>
-          <PanelSectionRow>
-            { `http://${serverIP}:${port}` }
-          </PanelSectionRow>
-          <PanelSectionRow>
-              <QRCodeSVG
-                value={ `http://${serverIP}:${port}` }
-                size={256}
-              />
+        { isServerRunning ? (
+          <>
+            <PanelSectionRow>
+              { `http://${serverIP}:${port}` }
+            </PanelSectionRow>
+            <PanelSectionRow>
+                <QRCodeSVG
+                  value={ `http://${serverIP}:${port}` }
+                  size={256}
+                />
 
-          </PanelSectionRow>
-        </>
-      ) : (
-        <>
-          <PanelSectionRow>
-            <ButtonItem
-              layout="below"
-              onClick={ handleGoToSettings }
-              disabled={ isLoading }
-            >
-              Go to Settings
-            </ButtonItem>
-          </PanelSectionRow>
-          <PanelSectionRow>
-            <TextField
-              label="Port"
-              description="Port to be used to connect"
-              mustBeNumeric
-              onChange={ handlePortChange }
-              value={ port }
-            />
-          </PanelSectionRow>
-          <PanelSectionRow>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <img src={logo} />
-            </div>
-          </PanelSectionRow>
-        </>
-        )
-      }
-    </PanelSection>
+            </PanelSectionRow>
+          </>
+        ) : (
+          <>
+            <PanelSectionRow>
+              <ButtonItem
+                layout="below"
+                onClick={ handleGoToSettings }
+                disabled={ isLoading }
+              >
+                Go to Settings
+              </ButtonItem>
+            </PanelSectionRow>
+          </>
+          )
+        }
+      </PanelSection>
+      <PanelSection title={ "Current Settings" }>
+        { isLoading ?
+          "Loading..."
+          : (
+            <PanelSectionRow>
+              Port: { port }
+            </PanelSectionRow>
+          )
+        }
+      </PanelSection>
+    </>
   );
 };
 

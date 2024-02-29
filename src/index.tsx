@@ -5,7 +5,6 @@ import {
   PanelSectionRow,
   ServerAPI,
   staticClasses,
-  TextField,
   Navigation,
 } from "decky-frontend-lib";
 import { useContext, useEffect, useState, VFC } from "react";

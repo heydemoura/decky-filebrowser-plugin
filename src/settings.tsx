@@ -1,9 +1,7 @@
 import { useContext, useCallback, useEffect, useState } from 'react';
 import {
   ButtonItem,
-  DialogButton,
   TextField,
-  Navigation,
   PanelSection,
   PanelSectionRow,
 } from "decky-frontend-lib";

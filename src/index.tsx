@@ -5,28 +5,34 @@ import {
   PanelSectionRow,
   ServerAPI,
   staticClasses,
+  Navigation,
 } from "decky-frontend-lib";
-import { useEffect, useState, VFC } from "react";
+import { useContext, useEffect, useState, VFC } from "react";
 import { FaServer } from "react-icons/fa";
 import { QRCodeSVG } from 'qrcode.react';
+import Settings from './settings';
+import { AppContext, AppContextProvider } from './utils/app-context';
+import FileBrowserManager from './state/filebrowser-manager';
 
-import logo from "../assets/logo.png";
-
-interface GetFileBrowserStatusResult { result: { pid: string | number, ipv4_address: string }, success: boolean };
-
-const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
+const Content: VFC = () => {
+  const [ isLoading, setIsLoading ] = useState( false );
   const [ serverStatus, setServerStatus ] = useState( false );
   const [ serverIP, setServerIP ] = useState( "127.0.0.1" );
   const [ processPID, setProcessPID ] = useState( -1 );
+  const [ port, setPort ] = useState( null );
+
+  // @ts-ignore
+  const { fileBrowserManager } = useContext(AppContext);
+  const serverApi = fileBrowserManager.getServer();
+
+  const isServerRunning = serverStatus && processPID > 0;
 
   const handleStartServer = async () => {
-    if ( serverStatus && processPID > 0 ) {
+    if ( isServerRunning ) {
       console.log( 'Server is running, closing' );
-      const result = await serverAPI.callPluginMethod("stopFileBrowser", {
+      const result = await serverApi.callPluginMethod("stopFileBrowser", {
         pid: processPID
       });
-
-      console.log( result );
 
       if (result.success) {
         setProcessPID( -1 );
@@ -40,72 +46,114 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
       return;
     }
 
-    const result = await serverAPI.callPluginMethod("startFileBrowser", {})
+    const result = await serverApi.callPluginMethod("startFileBrowser", {
+      port: fileBrowserManager.getPort()
+    });
 
     if (result.success) {
+      await fileBrowserManager.getFileBrowserStatus();
+      setServerIP( fileBrowserManager.getIPV4Address() );
       setProcessPID( result.result as number )
       setServerStatus( true );
     } else {
       console.error( result );
     }
+  }
 
+  const handleGoToSettings = () => {
+    Navigation.CloseSideMenus();
+    Navigation.Navigate("/decky-filebrowser-settings")
   }
 
   useEffect( () => {
     const loadStatus = async () => {
-      const result = await serverAPI.callPluginMethod("getFileBrowserStatus", {}) as GetFileBrowserStatusResult;
-
-      if (result.result) {
-        setProcessPID( result.result.pid as number );
-        setServerStatus( true );
-        setServerIP( result.result.ipv4_address );
-      } else {
-        setProcessPID( -1 );
-        setServerStatus( false );
-      }
+      setIsLoading( true );
+      await fileBrowserManager.getFileBrowserStatus();
+      setPort( fileBrowserManager.getPort() );
+      setIsLoading( false );
     }
+
     loadStatus();
-  } );
+  }, [] );
 
   return (
-    <PanelSection title={ serverStatus ? "Server ON" : "Server OFF" }>
-      <PanelSectionRow>
-        <ButtonItem layout="below"
-          onClick={handleStartServer}
-        >
-          { serverStatus ? "Stop Server" : "Start Server" }
-        </ButtonItem>
-      </PanelSectionRow>
-
-      { processPID > 0 && serverStatus ? (
-        <>
-          <PanelSectionRow>
-            { `http://${serverIP}:8082` }
-          </PanelSectionRow>
-          <PanelSectionRow>
-              <QRCodeSVG
-                value={ `http://${serverIP}:8082` }
-                size={256}
-              />
-
-          </PanelSectionRow>
-        </>
-      ) : (
+    <>
+      <PanelSection title={ isServerRunning ? "Server ON" : "Server OFF" }>
         <PanelSectionRow>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <img src={logo} />
-          </div>
+          <ButtonItem layout="below"
+            onClick={handleStartServer}
+            disabled={ isLoading }
+          >
+            { isServerRunning ? "Stop Server" : "Start Server" }
+          </ButtonItem>
         </PanelSectionRow>
-        )
-      }
-    </PanelSection>
+
+        { isServerRunning ? (
+          <>
+            <PanelSectionRow>
+              { `http://${serverIP}:${port}` }
+            </PanelSectionRow>
+            <PanelSectionRow>
+                <QRCodeSVG
+                  value={ `http://${serverIP}:${port}` }
+                  size={256}
+                />
+
+            </PanelSectionRow>
+          </>
+        ) : (
+          <>
+            <PanelSectionRow>
+              <ButtonItem
+                layout="below"
+                onClick={ handleGoToSettings }
+                disabled={ isLoading }
+              >
+                Go to Settings
+              </ButtonItem>
+            </PanelSectionRow>
+          </>
+          )
+        }
+      </PanelSection>
+      <PanelSection title={ "Current Settings" }>
+        { isLoading ?
+          "Loading..."
+          : (
+            <PanelSectionRow>
+              Port: { port }
+            </PanelSectionRow>
+          )
+        }
+      </PanelSection>
+    </>
   );
 };
 
+
+
 export default definePlugin((serverApi: ServerAPI) => {
+  const fileBrowserManager = new FileBrowserManager( serverApi );
+
+  serverApi.routerHook.addRoute("/decky-filebrowser-settings", () => (
+      <AppContextProvider fileBrowserManager={fileBrowserManager}>
+      <Settings />
+    </AppContextProvider>
+  ), {
+    exact: true,
+  });
+
+
   return {
     title: <div className={staticClasses.Title}>File Browser</div>,
-    content: <Content serverAPI={serverApi} />,
+    content: (
+      <AppContextProvider fileBrowserManager={fileBrowserManager} >
+        <Content />
+      </AppContextProvider>
+    ),
     icon: <FaServer />,
+    onDismount: () => {
+      serverApi.routerHook.removeRoute("/decky-filebrowser-settings");
+    }
   };
 });

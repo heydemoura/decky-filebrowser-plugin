@@ -3,6 +3,9 @@ import asyncio
 import subprocess
 import socket
 
+# Initialize decky-loader settings manager
+from settings import SettingsManager
+
 # The decky plugin module is located at decky-loader/plugin
 # For easy intellisense checkout the decky-loader code one directory up
 # or add the `decky-loader/plugin` path to `python.analysis.extraPaths` in `.vscode/settings.json`
@@ -13,12 +16,11 @@ settingsDir = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
 script_dir = decky_plugin.DECKY_PLUGIN_DIR
 pidfile = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR + "/decky-filebrowser.pid"
 
+# Load user's settings
+settings = SettingsManager(name="settings", settings_directory=settingsDir)
+settings.read()
 
 class Plugin:
-    # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
-    async def add(self, left, right):
-        return left + right
-
     async def getFileBrowserStatus( self ):
         if os.path.exists( pidfile ):
             with open( pidfile, "r" ) as file:
@@ -29,15 +31,21 @@ class Plugin:
 
             return {
                 "pid": pid_str,
-                "ipv4_address": ipv4_address
+                "ipv4_address": ipv4_address,
+                "port": settings.getSetting("port"),
             }
 
         else:
-            return False
+            return {
+                "port": settings.getSetting("port")
+            }
 
-    async def startFileBrowser( self, port = "8082" ):
-        command = script_dir + "/bin/filebrowser -p " + port + " -a 0.0.0.0 -r " + decky_plugin.DECKY_USER_HOME
+    async def startFileBrowser( self, port = 8082 ):
+        command = script_dir + "/bin/filebrowser -p " + str(port) + " -a 0.0.0.0 -r " + decky_plugin.DECKY_USER_HOME
         process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+        # Defines the received port as the port setting
+        settings.setSetting("port", port)
 
         with open(pidfile, "w") as file:
             file.write(str(process.pid))
@@ -59,6 +67,13 @@ class Plugin:
             os.remove(pidfile)
 
         return output_str
+
+    async def get_setting( self, key ):
+        return settings.getSetting( key );
+
+    async def save_user_settings( self, key: str, value ):
+        decky_plugin.logger.info("Changing settings - {}: {}".format( key, value ))
+        return settings.setSetting( key, value )
 
     # Asyncio-compatible long-running code, executed in a task when the plugin is loaded
     async def _main(self):

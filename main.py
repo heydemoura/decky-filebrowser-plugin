@@ -8,8 +8,11 @@ import socket
 # or add the `decky-loader/plugin` path to `python.analysis.extraPaths` in `.vscode/settings.json`
 import decky_plugin
 
-script_dir = os.environ["DECKY_PLUGIN_DIR"]
-pidfile = os.environ["DECKY_PLUGIN_RUNTIME_DIR"] + "/decky-filebrowser.pid"
+settingsDir = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
+
+script_dir = decky_plugin.DECKY_PLUGIN_DIR
+pidfile = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR + "/decky-filebrowser.pid"
+
 
 class Plugin:
     # A normal method. It can be called from JavaScript using call_plugin_function("method_1", argument1, argument2)
@@ -33,7 +36,7 @@ class Plugin:
             return False
 
     async def startFileBrowser( self, port = "8082" ):
-        command = script_dir + "/bin/filebrowser -p " + port + " -a 0.0.0.0 -r " + os.environ["DECKY_USER_HOME"]
+        command = script_dir + "/bin/filebrowser -p " + port + " -a 0.0.0.0 -r " + decky_plugin.DECKY_USER_HOME
         process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
         with open(pidfile, "w") as file:

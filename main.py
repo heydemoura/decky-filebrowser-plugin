@@ -40,8 +40,8 @@ class Plugin:
                 "port": settings.getSetting("port")
             }
 
-    async def startFileBrowser( self, port = "8082" ):
-        command = script_dir + "/bin/filebrowser -p " + port + " -a 0.0.0.0 -r " + decky_plugin.DECKY_USER_HOME
+    async def startFileBrowser( self, port = 8082 ):
+        command = script_dir + "/bin/filebrowser -p " + str(port) + " -a 0.0.0.0 -r " + decky_plugin.DECKY_USER_HOME
         process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
         # Defines the received port as the port setting
@@ -67,6 +67,13 @@ class Plugin:
             os.remove(pidfile)
 
         return output_str
+
+    async def get_setting( self, key ):
+        return settings.getSetting( key );
+
+    async def save_user_settings( self, key: str, value ):
+        decky_plugin.logger.info("Changing settings - {}: {}".format( key, value ))
+        return settings.setSetting( key, value )
 
     # Asyncio-compatible long-running code, executed in a task when the plugin is loaded
     async def _main(self):

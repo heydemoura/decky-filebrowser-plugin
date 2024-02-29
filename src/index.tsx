@@ -77,19 +77,27 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({serverAPI}) => {
         </ButtonItem>
       </PanelSectionRow>
 
-      <PanelSectionRow>
-        { processPID > 0 && serverStatus ?
-          <QRCodeSVG
-            value={ `http://${serverIP}:8082` }
-            size={256}
-          />
-          : (
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <img src={logo} />
-            </div>
-          )
-        }
-      </PanelSectionRow>
+      { processPID > 0 && serverStatus ? (
+        <>
+          <PanelSectionRow>
+            { `http://${serverIP}:8082` }
+          </PanelSectionRow>
+          <PanelSectionRow>
+              <QRCodeSVG
+                value={ `http://${serverIP}:8082` }
+                size={256}
+              />
+
+          </PanelSectionRow>
+        </>
+      ) : (
+        <PanelSectionRow>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <img src={logo} />
+          </div>
+        </PanelSectionRow>
+        )
+      }
     </PanelSection>
   );
 };

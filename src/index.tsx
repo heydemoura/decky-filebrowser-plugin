@@ -91,8 +91,7 @@ const Content: VFC = () => {
         { isServerRunning ? (
           <>
             <PanelSectionRow>
-              <p>{ `https://${serverIP}:${port}` }</p>
-              <p>{ `https://steamdeck:${port}` }</p>
+              { `https://${serverIP}:${port}` }
             </PanelSectionRow>
             <PanelSectionRow>
                 <QRCodeSVG

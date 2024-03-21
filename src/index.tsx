@@ -91,11 +91,12 @@ const Content: VFC = () => {
         { isServerRunning ? (
           <>
             <PanelSectionRow>
-              { `http://${serverIP}:${port}` }
+              <p>{ `https://${serverIP}:${port}` }</p>
+              <p>{ `https://steamdeck:${port}` }</p>
             </PanelSectionRow>
             <PanelSectionRow>
                 <QRCodeSVG
-                  value={ `http://${serverIP}:${port}` }
+                  value={ `https://${serverIP}:${port}` }
                   size={256}
                 />
 
@@ -125,6 +126,11 @@ const Content: VFC = () => {
             </PanelSectionRow>
           )
         }
+      </PanelSection>
+      <PanelSection title={ "Information" }>
+        <PanelSectionRow>
+          <p>Make sure your SteamDeck and the devices you are accessing the files with are on the same network.</p>
+        </PanelSectionRow>
       </PanelSection>
     </>
   );

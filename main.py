@@ -11,7 +11,7 @@ from settings import SettingsManager
 # or add the `decky-loader/plugin` path to `python.analysis.extraPaths` in `.vscode/settings.json`
 import decky_plugin
 
-settingsDir = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
+settings_dir = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR
 
 script_dir = decky_plugin.DECKY_PLUGIN_DIR
 pidfile = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR + "/decky-filebrowser.pid"
@@ -19,9 +19,11 @@ pidfile = decky_plugin.DECKY_PLUGIN_RUNTIME_DIR + "/decky-filebrowser.pid"
 # Strings useful for starting File Browser
 filebrowser_bin = decky_plugin.DECKY_PLUGIN_DIR + "/bin/filebrowser"
 filebrowser_database_path = decky_plugin.DECKY_PLUGIN_SETTINGS_DIR + "/filebrowser.db"
+filebrowser_cert_path = decky_plugin.DECKY_PLUGIN_DIR + "/bin/certs/cert.pem"
+filebrowser_key_path = decky_plugin.DECKY_PLUGIN_DIR + "/bin/certs/key.pem"
 
 # Load user's settings
-settings = SettingsManager(name="settings", settings_directory=settingsDir)
+settings = SettingsManager(name="settings", settings_directory=settings_dir)
 settings.read()
 
 class Plugin:
@@ -45,7 +47,15 @@ class Plugin:
             }
 
     async def startFileBrowser( self, port = 8082 ):
-        command = filebrowser_bin + " -p " + str(port) + " -a 0.0.0.0" + " -d " + filebrowser_database_path + " -r " + decky_plugin.DECKY_USER_HOME
+        command = (
+            filebrowser_bin +
+            " -p " + str(port) +
+            " -a 0.0.0.0" +
+            " -d " + filebrowser_database_path +
+            " -t " + filebrowser_cert_path +
+            " -k " + filebrowser_key_path +
+            " -r " + decky_plugin.DECKY_USER_HOME
+        )
 
         decky_plugin.logger.info("Running FileBrowser command: " + command)
         process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)

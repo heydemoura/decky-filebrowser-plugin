@@ -22,6 +22,10 @@ go mod download
 go build -o filebrowser
 cp filebrowser /backend/out
 
+echo "--- Bundling TLS certificates ---"
+mkdir -p /backend/out/certs
+cp /backend/certs/*.pem /backend/out/certs
+
 echo "--- Cleanup File Browser repo ---"
 cd /backend
 rm -rf filebrowser

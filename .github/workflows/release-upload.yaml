@@ -39,7 +39,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Get version
-        run: echo "::set-output name=version::$(cat package.json | jq .)"
+        run: echo "::set-output name=version::$( jq '.version' package.json)"
         id: version
 
       - name: Create release

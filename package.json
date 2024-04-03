@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Access your Steam Deck files remotely from a browser.",
   "scripts": {
-    "build": "decky plugin build",
+    "build-local": "decky plugin build",
     "watch": "rollup -c -w",
     "test": "echo \"Error: no test specified\" && exit 1",
     "sync": "scp -r ./ deck@192.168.0.125:/home/deck/homebrew/plugins/decky-filebrowser"

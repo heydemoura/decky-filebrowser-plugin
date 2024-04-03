@@ -3,15 +3,17 @@ name: Upload release package
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - uses: pnpm/action-setup@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8.5.1
 
@@ -26,38 +28,38 @@ jobs:
           chmod +x /tmp/decky-cli/decky
           echo "/tmp/decky-cli" >> $GITHUB_PATH
 
-    - name: Build plugin
-      run: |
-        echo "::group::Building DeckyFileBrowser"
+      - name: Build plugin
+        run: |
+          echo "::group::Building DeckyFileBrowser"
 
-        # Run the CLI as root to get around Docker's weird permissions
-        sudo $(which decky) plugin build
-        sudo chown -R $(whoami) out
+          # Run the CLI as root to get around Docker's weird permissions
+          sudo $(which decky) plugin build
+          sudo chown -R $(whoami) out
 
-        echo "::endgroup::"
+          echo "::endgroup::"
 
-    - name: version
-      run: echo "::set-output name=version::$(cat package.json|jq .)"
-      id: version
+      - name: Get version
+        run: echo "::set-output name=version::$(cat package.json | jq .)"
+        id: version
 
-    - name: release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        draft: false
-        prerelease: false
-        release_name: ${{ steps.version.outputs.version }}
-        tag_name: ${{ github.ref }}
-        body_path: CHANGELOG.md
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
-    - name: Upload zip to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./out/DeckyFileBrowser.zip
-        asset_name: DevkyFileBrowser-${{ steps.version.outputs.version }}.zip
-        asset_content_type: application/gzip
+      - name: Upload zip to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./out/DeckyFileBrowser.zip
+          asset_name: DeckyFileBrowser-${{ steps.version.outputs.version }}.zip
+          asset_content_type: application/gzip

@@ -61,5 +61,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./out/DeckyFileBrowser.zip
-          asset_name: "DeckyFileBrowser-${{ github.ref }}.zip"
+          asset_name: "DeckyFileBrowser.zip"
           asset_content_type: application/gzip

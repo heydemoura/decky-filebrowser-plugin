@@ -48,7 +48,7 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: "DeckyFileBrowser ${{ github.ref }}"
+          release_name: "v${{ github.ref }}"
           tag_name: ${{ github.ref }}
           body_path: CHANGELOG.md
         env:
@@ -61,5 +61,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./out/DeckyFileBrowser.zip
-          asset_name: DeckyFileBrowser-v${{ github.ref }}.zip
+          asset_name: "DeckyFileBrowser-${{ github.ref }}.zip"
           asset_content_type: application/gzip
